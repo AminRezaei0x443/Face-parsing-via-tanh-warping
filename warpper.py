@@ -15,7 +15,7 @@ from tqdm import tqdm
 from PIL import Image
 import pickle
 from template import TemplateModel
-from tensorboardX import SummaryWriter
+# from tensorboardX import SummaryWriter
 from prefetch_generator import BackgroundGenerator
 from multiprocessing import set_start_method
 
@@ -24,15 +24,15 @@ from multiprocessing import set_start_method
 # except RuntimeError:
 #     pass
 
-preprocess_device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
+preprocess_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # preprocess_device = torch.device("cpu")
 
 # Dataset and Dataloader
 # Dataset Read_in Part
 root_dir = {
-    'train': "/home/yinzi/data3/relabel_helen/helenstar_release/train",
-    'val': "/home/yinzi/data3/relabel_helen/helenstar_release/train",
-    'test': "/home/yinzi/data3/relabel_helen/helenstar_release/test"
+    'train': "/content/helenstar_release/train",
+    'val': "/content/helenstar_release/train",
+    'test': "/content/helenstar_release/test"
 }
 
 transforms_list = {
@@ -61,7 +61,7 @@ dataloader = {x: DataLoader(Dataset[x], batch_size=1,
                             shuffle=False, num_workers=0)
               for x in ['train', 'test', 'val']
               }
-outpath = "/home/yinzi/data4/warped/"
+outpath = "/content/warped_data/"
 
 if __name__ == '__main__':
     for x in ['train', 'test', 'val']:
