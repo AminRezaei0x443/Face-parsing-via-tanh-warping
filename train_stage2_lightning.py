@@ -1,10 +1,11 @@
 from torchvision.transforms import transforms
-from model import Hybird
+from model_lightning import Hybird
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
 import argparse
 from collections import OrderedDict
-from preprocess import Warping
+from preprocess import Warping, PrepareLabels,ToTensor
+import torch
 
 
 hparam = OrderedDict()
@@ -31,25 +32,31 @@ parser.add_argument("--epochs", default=25, type=int, help="Number of epochs to 
 parser.add_argument("--momentum", default=0.9, type=float, help="Momentum")
 parser.add_argument("--decay", default=0.01, type=float, help="Weight decay")
 parser.add_argument("--dampening", default=0, type=float, help="dampening for momentum")
+parser.add_argument("--workers", default=0, type=int, help="DataLoader Threads")
 
 root_dir = {
-    'train': "/home/yinzi/data3/relabel_helen/helenstar_release/train",
-    'val': "/home/yinzi/data3/relabel_helen/helenstar_release/train",
-    'test': "/home/yinzi/data3/relabel_helen/helenstar_release/test"
+    'train': "/content/warped_data/train",
+    'val': "/content/warped_data/val",
+    'test': "/content/warped_data/test"
 }
+
+preprocess_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 transforms_list = {
     'train':
         transforms.Compose([
-            Warping((512, 512))
+            PrepareLabels((128, 128)),
+            ToTensor()
         ]),
     'val':
         transforms.Compose([
-            Warping((512, 512))
+            PrepareLabels((128, 128)),
+            ToTensor()
         ]),
     'test':
         transforms.Compose([
-            Warping((512, 512))
+            PrepareLabels((128, 128)),
+            ToTensor()
         ])
 }
 
@@ -59,13 +66,12 @@ hparam['args'] = parser.parse_args()
 hparam['root_dir'] = root_dir
 hparam['transforms'] = transforms_list
 hparam['pretrain_path'] = pretrain_path
-print(hparam)
+# print(hparam)
 
 stage2 = Hybird(hparam)
 
 checkpoint_callback = ModelCheckpoint(
     filepath='stage2/weights.ckpt',
-    save_best_only=True,
     verbose=True,
     monitor='val_accu',
     mode='max'
