@@ -32,7 +32,7 @@ class Stage1(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         image, warp_boxes = batch['image'].to(self.device), batch['warp_boxes'].to(self.device)
-        pred = self.model(image)
+        pred = self.forward(image)
         assert pred.shape == (pred.shape[0], 4, 4)
         assert pred.shape == warp_boxes.shape
         loss = self.criterion(torch.tanh(pred), warp_boxes)
@@ -46,7 +46,7 @@ class Stage1(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         image, warp_boxes = batch['image'].to(self.device), batch['warp_boxes'].to(self.device)
-        pred = self.model(image)
+        pred = self.forward(image)
         assert pred.shape == (pred.shape[0], 4, 4)
         assert pred.shape == warp_boxes.shape
         loss = self.criterion(torch.tanh(pred), warp_boxes)
@@ -62,7 +62,7 @@ class Stage1(pl.LightningModule):
         for out in outputs:
             loss_list.append(out['val_loss'])
 
-        mean_error = np.mean(loss_list)
+        mean_error = torch.mean(torch.tensor(loss_list)).item()
         tqdm_dict = {'val_loss': mean_error}
         result = {'progress_bar': tqdm_dict, 'log': tqdm_dict, 'val_loss': tqdm_dict["val_loss"]}
         return result
