@@ -78,5 +78,11 @@ checkpoint_callback = ModelCheckpoint(
 )
 
 
-trainer = pl.Trainer(checkpoint_callback=checkpoint_callback)
+trainer = pl.Trainer(checkpoint_callback=checkpoint_callback,
+    gpus=torch.cuda.device_count(),
+    max_epochs=hparam['args'].epochs,
+    precision=hparam['args'].precision,
+    benchmark=hparam['args'].benchmark,
+    accumulate_grad_batches=hparam['args'].accumulate,
+    amp_level=hparam['args'].amp_level))
 trainer.fit(stage2)
