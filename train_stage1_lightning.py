@@ -24,7 +24,7 @@ parser.add_argument('--amp_level', type=str, default='O1', choices=('O0', 'O1', 
                     help='amp_level')
 parser.add_argument("--accumulate", default=2, type=int, help="Accumulate_grad_batches")
 parser.add_argument("--batch_size", default=64, type=int, help="Batch size to use during training.")
-parser.add_argument("--workers", default=4, type=int, help="DataLoader Threads")
+parser.add_argument("--workers", default=0, type=int, help="DataLoader Threads")
 parser.add_argument("--lr", default=0.01, type=float, help="Learning rate for optimizer")
 parser.add_argument("--epochs", default=25, type=int, help="Number of epochs to train")
 parser.add_argument("--momentum", default=0.9, type=float, help="Momentum")
