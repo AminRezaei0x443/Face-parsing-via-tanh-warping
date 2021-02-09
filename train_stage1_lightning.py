@@ -1,6 +1,6 @@
 from torchvision.transforms import transforms
 import torch
-from model import Stage1
+from model_lightning import Stage1
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
 import argparse
@@ -9,8 +9,6 @@ from preprocess import Warping
 
 hparam = OrderedDict()
 parser = argparse.ArgumentParser()
-parser.add_argument('--gpus', type=list, default=[9],
-                    help='Select gpus')
 parser.add_argument('--save_path', metavar='DIR', default="checkpoints", type=str,
                     help='path to save output')
 parser.add_argument('--distributed-backend', type=str, default='dp', choices=('dp', 'ddp', 'ddp2'),
@@ -34,12 +32,11 @@ parser.add_argument("--decay", default=0.01, type=float, help="Weight decay")
 parser.add_argument("--dampening", default=0, type=float, help="dampening for momentum")
 
 root_dir = {
-    'train': "/home/yinzi/data3/relabel_helen/helenstar_release/train",
-    'val': "/home/yinzi/data3/relabel_helen/helenstar_release/train",
-    'test': "/home/yinzi/data3/relabel_helen/helenstar_release/test"
+    'train': "/content/helenstar_release/train",
+    'val': "/content/helenstar_release/train",
+    'test': "/content/helenstar_release/test"
 }
-# preprocess_device = torch.device("cuda:9"  if torch.cuda.is_available() else "cpu")
-preprocess_device = torch.device("cpu")
+preprocess_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 transforms_list = {
     'train':
@@ -71,7 +68,8 @@ checkpoint_callback = ModelCheckpoint(
 
 train_stage1 = Stage1(hparam)
 trainer = pl.Trainer(
-    gpus=hparam['args'].gpus,
+    checkpoint_callback=checkpoint_callback,
+    gpus=torch.cuda.device_count(),
     max_epochs=hparam['args'].epochs,
     precision=hparam['args'].precision,
     benchmark=hparam['args'].benchmark,
